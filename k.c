@@ -4,11 +4,11 @@
 
 MODULE_LICENSE("GPL");
 MODULE_AUTHOR("Gustavo Romero");
-MODULE_DESCRIPTION("Trepanner");
+MODULE_DESCRIPTION("injector");
 MODULE_VERSION("v0.1");
 
-static int __init trepanner_init(void) {
-  printk("KERN_INFO Trepanner module v0.1 init()\n");
+static int __init injector_init(void) {
+  printk("KERN_INFO injector module v0.1 init()\n");
   asm volatile (
       "li      3, 42;" /* '*' */
       "sldi    6,3,(24+32);"
@@ -21,10 +21,10 @@ static int __init trepanner_init(void) {
   return 0;
 }
 
-static void __exit trepanner_exit(void) {
-  printk("Trepanner module exit()\n");
+static void __exit injector_exit(void) {
+  printk("injector module exit()\n");
 }
 
-module_init(trepanner_init);
-module_exit(trepanner_exit);
+module_init(injector_init);
+module_exit(injector_exit);
 
