@@ -62,7 +62,7 @@ ssize_t write_operation(struct file *f, const char __user *dst, size_t count, lo
 	} else if (count % I_SIZE) {
 		printk("Nack, you should inject a number of bytes aligned to instruction size (32-bit)\n");
 		count = count & ~(I_SIZE - 1);
-		printk("Trucating to %ld byte(s)\n", count);
+		printk("Truncating to %ld byte(s)\n", count);
 	} else if (count > MAX_CACHE_SIZE) {
 		count = MAX_CACHE_SIZE;
 	}
@@ -76,7 +76,7 @@ ssize_t write_operation(struct file *f, const char __user *dst, size_t count, lo
 	for (instr = 0; instr < count; instr += I_SIZE) {
 		printk("I[%d]: ", instr / I_SIZE);
 		for (i = 0; i < I_SIZE && instr+i < count; i++)
-			printk(KERN_CONT "%x ", codecache[instr+i]);
+			printk(KERN_CONT "%.2x", codecache[instr+i]);
 		printk(KERN_CONT "\n");
 	}
 	return received;
