@@ -52,6 +52,7 @@ ssize_t write_operation(struct file *f, const char __user *dst, size_t count, lo
 {
 	int instr, i;
 	size_t received;
+	void (*func)(void);
 
 	// stash number of received bytes before any truncation
 	received = count;
@@ -67,7 +68,7 @@ ssize_t write_operation(struct file *f, const char __user *dst, size_t count, lo
 		count = MAX_CACHE_SIZE;
 	}
 
-	printk("Dumping %ld bytes from userspace @%p\n", count, codecache);
+	printk("Dumping %ld bytes from userspace @%p:\n", count, codecache);
 	if (copy_from_user(codecache, dst, count)) {
 		return -EFAULT;
 	}
@@ -79,6 +80,12 @@ ssize_t write_operation(struct file *f, const char __user *dst, size_t count, lo
 			printk(KERN_CONT "%.2x", codecache[instr+i]);
 		printk(KERN_CONT "\n");
 	}
+
+	printk("Executing codecache... ");
+	func = (void *)codecache;
+	func();
+	printk(KERN_CONT "done!\n");
+
 	return received;
 }
 
