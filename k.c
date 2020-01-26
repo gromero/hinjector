@@ -67,7 +67,7 @@ ssize_t write_operation(struct file *f, const char __user *dst, size_t count, lo
 		count = MAX_CACHE_SIZE;
 	}
 
-	printk("Dumping %ld bytes from userspace\n", count);
+	printk("Dumping %ld bytes from userspace @%p\n", count, codecache);
 	if (copy_from_user(codecache, dst, count)) {
 		return -EFAULT;
 	}
