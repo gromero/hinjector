@@ -185,11 +185,11 @@ void load(int r, int64_t imm64) {
 	xb = (imm64 >> 32) & 0xFFFF;
 	xa = (imm64 >> 48) & 0xFFFF;
 
-	*instr_ptr = lis(r, xd); instr_ptr++;
-	*instr_ptr = ori(r, r, xc); instr_ptr++;
+	*instr_ptr = lis(r, xa); instr_ptr++;
+	*instr_ptr = ori(r, r, xb); instr_ptr++;
 	*instr_ptr = sldi(r, r, 32); instr_ptr++;
-	*instr_ptr = oris(r, r, xb); instr_ptr++;
-	*instr_ptr = ori(r, r, xa); instr_ptr++;
+	*instr_ptr = oris(r, r, xc); instr_ptr++;
+	*instr_ptr = ori(r, r, xd); instr_ptr++;
 }
 
 /* Helpers */
