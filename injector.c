@@ -6,6 +6,11 @@
 #include <fcntl.h>
 #include <inttypes.h>
 
+#define r3 	3
+#define r4	4
+#define r5	5
+#define r6	6
+
 #define DEV	"/dev/injector"
 
 #define OPCODE_SHIFT	26u
@@ -47,7 +52,9 @@
 #define ORIS_OPCODE	(25u << OPCODE_SHIFT)
 
 static uint32_t codecache[1024*10];
+static const uint32_t *first_instr = &codecache[0];
 static uint32_t *instr_ptr = &codecache[0];
+
 
 // load <reg>
 
@@ -61,7 +68,7 @@ static uint32_t *instr_ptr = &codecache[0];
 // blr *
 
 uint32_t sh04_field(int sh) {
-	return ((sh >> SH5_SHIFT) & SH04_MASK) << SH04_SHIFT;
+	return ((sh >> 1) & SH04_MASK) << SH04_SHIFT;
 }
 
 uint32_t sh5_field(int sh) {
@@ -103,16 +110,16 @@ uint32_t rs(int r) {
 	return rt(r);
 }
 
-uint32_t rldcir(int a, int s, int sh, int me) {
+uint32_t rldicr(int a, int s, int sh, int me) {
 	return RLDICR_OPCODE | rs(s) | ra(a) | sh04_field(sh) | me_field(me) | bit_field(1, 0x7, 2) | sh5_field(sh) | rc_field(0);
 }
 
-uint32_t rldcir_(int a, int s, int sh, int me) {
+uint32_t rldicr_(int a, int s, int sh, int me) {
 	return RLDICR_OPCODE | rs(s) | ra(a) | sh04_field(sh) | me_field(me) | bit_field(1, 0x7, 2) | sh5_field(sh) | rc_field(1);
 }
 
 uint32_t sldi(int a, int s, int n) {
-	return rldcir(a, s, n, 63-n);
+	return rldicr(a, s, n, 63-n);
 }
 
 uint32_t ori(int a, int s, uint16_t usimm16) {
@@ -195,6 +202,7 @@ void pcodecache() {
 int main(int argc, char *argv[])
 {
 	int fd;
+	uint32_t *i = instr_ptr;
 
 	fd = open(DEV, O_RDWR);
  	if (fd < 0) {
@@ -205,13 +213,23 @@ int main(int argc, char *argv[])
 	printf("Openning device " DEV "... \n");
 	printf("Codecache is @%p\n", instr_ptr);
 
-	printf("%#.8x\n", addi(3, 0, 0xbe));
-	printf("%#.8x\n", li(3, 0xbe));
-	printf("%#.8x\n", ori(3, 4, 0xbe));
-	pi(blr());
-	printf("--\n");
-	pcodecache();
-	printf("--\n");
-	load(3, 0xdeadbeefc0debabe);
+//	printf("%#.8x\n", addi(3, 0, 0xbe));
+//	printf("%#.8x\n", li(3, 0xbe));
+//	printf("%#.8x\n", ori(3, 4, 0xbe));
+//	pi(blr());
+//	pcodecache();
+//	load(3, 0xdeadbeefc0debabe);
+
+	*i = li(r3, 42 /* '*' */); i++;
+//	*i = sldi(r6, r3, (24+32)); i++;
+//	rldicr  r6,r3,56,7
+	*i = rldicr(r6,r3,56,7); i++;
+	*i = li(r3, 0x58); i++;
+	*i = li(r4, 0); i++;
+	*i = li(r5, 1); i++;
+	*i = sc(1); i++;
+
+	instr_ptr = i;
+
 	pcodecache();
 }
