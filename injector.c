@@ -68,15 +68,21 @@ static uint32_t *instr_ptr = &codecache[0];
 // blr *
 
 uint32_t sh04_field(int sh) {
-	return ((sh >> 1) & SH04_MASK) << SH04_SHIFT;
+	return (sh & SH04_MASK) << SH04_SHIFT;
 }
 
 uint32_t sh5_field(int sh) {
-	return (sh & SH5_MASK) << SH5_SHIFT;
+	return ((sh >> 5u) & SH5_MASK) << SH5_SHIFT;
 }
 
 uint32_t me_field(int me) {
-	return (me & ME_MASK) << ME_SHIFT;
+	uint32_t me5, me04;
+
+	me5 = (me >> 5u) & 1;
+	me04 = me << 1u;
+	me = (me5 | me04) & ME_MASK;
+	me = me << ME_SHIFT;
+	return me;
 }
 
 uint32_t rc_field(int rc) {
