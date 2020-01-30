@@ -1,6 +1,7 @@
+CC=gcc
 obj-m += k.o
 
-all:
+all:	injector
 	make -C /lib/modules/$(shell uname -r)/build M=$(PWD) modules
 
 insmod:	k.ko
@@ -15,5 +16,10 @@ injection: payload.S
 	objcopy -O binary -j .text payload.o payload.bin
 	./injection.sh
 
+injector: injector.o
+	gcc injector.c -o injector
+
 clean:
 	rm -fr k.ko k.mod.*
+	rm -fr injector
+	rm -fr *.o
