@@ -10,7 +10,6 @@ injector
 k.ko
 k.mod
 k.mod.c
-k.mod.o
 modules.order
-payload.bin
-payload.o
+*.o
+*.bin
