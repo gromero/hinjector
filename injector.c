@@ -25,6 +25,7 @@
 #define LK_SHIFT	0u
 #define BO_SHIFT	21u
 #define BH_SHIFT	11u
+#define SPR_SHIFT	1u
 
 #define RA_MASK		0x1F
 #define RT_MASK		0x1F
@@ -38,6 +39,7 @@
 #define LK_MASK		0x1
 #define BO_MASK		0x1F
 #define BH_MASK		0x1F
+#define SPR_MASK	0x3FF
 
 /* Branch conditions and hints */
 #define BO_BRANCH_ALWAYS	0x14
@@ -50,6 +52,10 @@
 #define SC_OPCODE	(17u << OPCODE_SHIFT)
 #define BCLR_OPCODE	(19u << OPCODE_SHIFT)
 #define ORIS_OPCODE	(25u << OPCODE_SHIFT)
+#define MFSPR_OPCODE	(31u << OPCODE_SHIFT)
+#define MTSPR_OPCODE	(31u << OPCODE_SHIFT)
+#define MTMSRD_OPCODE	(31u << OPCODE_SHIFT)
+#define MFMSR_OPCODE	(31u << OPCODE_SHIFT)
 
 static uint32_t codecache[1024*10];
 static const uint32_t *first_instr = &codecache[0];
@@ -91,6 +97,10 @@ uint32_t rc_field(int rc) {
 
 uint32_t bit_field(int b, int mask, int shift) {
 	return (b & mask) << shift;
+}
+
+uint32_t spr_field(int spr) {
+	return (spr & SPR_MASK) << SPR_SHIFT;
 }
 
 /*
@@ -174,6 +184,26 @@ uint32_t blr(void) {
 	       bit_field(BH_SUBROUTINE_RETURN, BH_MASK, BH_SHIFT) |
 	       bit_field(16, 0x3FF, 1) |
 	       /* LK = 0 */ 0u;
+}
+
+uint32_t mtspr(int spr, int s) {
+	return MTSPR_OPCODE | rs(s) | spr_field(spr) | 467u << 1u;
+}
+
+uint32_t mfspr(int t, int spr) {
+	return MFSPR_OPCODE | rt(t) | spr_field(spr) | 339u << 1u;
+}
+
+uint32_t mtmsrd(int s, int l) {
+	return MTMSRD_OPCODE | rs(s) | ((l & 1) << 16u) | 178u << 1u;
+}
+
+uint32_t mtmsrd(int s) {
+	return mtmsrd(s, 0);
+}
+
+uint32_t mfmsr(int t) {
+	return MFMSR_OPCODE | rt(t) | 83u << 1u;
 }
 
 /* Macro */
