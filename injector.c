@@ -199,10 +199,6 @@ uint32_t mtmsrd(int s, int l) {
 	return MTMSRD_OPCODE | rs(s) | ((l & 1) << 16u) | 178u << 1u;
 }
 
-uint32_t mtmsrd(int s) {
-	return mtmsrd(s, 0);
-}
-
 uint32_t mfmsr(int t) {
 	return MFMSR_OPCODE | rt(t) | 83u << 1u;
 }
