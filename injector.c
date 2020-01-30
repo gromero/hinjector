@@ -278,8 +278,9 @@ int main(int argc, char *argv[])
           *instr_ptr = li(r3, 'A'); instr_ptr++;
 	  *instr_ptr = sldi(r6, r3, (24+32)); instr_ptr++;
 
-	  load(r4, (uint64_t) 1u << 32u); // Set TM bit, so we don't get TM unavailable exception in kernel space
-          *instr_ptr = mfmsr(r3); instr_ptr++;
+	  // Set TM bit, so we don't get TM unavailable exception in kernel space
+	  load(r4, (uint64_t) 1u << 32u);
+	  *instr_ptr = mfmsr(r3); instr_ptr++;
 	  *instr_ptr = 0x7c831b78; instr_ptr++; // or r3, r4, r3
 	  *instr_ptr = mtmsrd(r3, 0); instr_ptr++;
 
