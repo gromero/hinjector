@@ -5,6 +5,7 @@
 #include <sys/stat.h>
 #include <fcntl.h>
 #include <inttypes.h>
+#include <unistd.h>
 
 #define r3 	3
 #define r4	4
@@ -207,7 +208,7 @@ uint32_t mfmsr(int t) {
 }
 
 /* Macro */
-void load(int r, int64_t imm64) {
+void load(int r, uint64_t imm64) {
 	short xa, xb, xc, xd;
 	// x = xa xb xc xd
 	xd = imm64 & 0xFFFF;
@@ -237,35 +238,68 @@ void pcodecache() {
 
 int main(int argc, char *argv[])
 {
-	int fd;
-	uint32_t *i = instr_ptr;
+	int fd, r;
+//	int i;
 
 	fd = open(DEV, O_RDWR);
  	if (fd < 0) {
 		perror("open()");
 		exit(1);
 	}
-
 	printf("Openning device " DEV "... \n");
-	printf("Codecache is @%p\n", instr_ptr);
+	printf("Codecache @%p\n", instr_ptr);
 
-//	printf("%#.8x\n", addi(3, 0, 0xbe));
-//	printf("%#.8x\n", li(3, 0xbe));
-//	printf("%#.8x\n", ori(3, 4, 0xbe));
-//	pi(blr());
-//	pcodecache();
-//	load(3, 0xdeadbeefc0debabe);
-
-	*i = li(r3, 42 /* '*' */); i++;
-//	*i = sldi(r6, r3, (24+32)); i++;
-//	rldicr  r6,r3,56,7
-	*i = rldicr(r6,r3,56,7); i++;
-	*i = li(r3, 0x58); i++;
-	*i = li(r4, 0); i++;
-	*i = li(r5, 1); i++;
-	*i = sc(1); i++;
-
-	instr_ptr = i;
-
+/**** FOR DEBUG ****
+	printf("%#.8x\n", addi(3, 0, 0xbe));
+	printf("%#.8x\n", li(3, 0xbe));
+	printf("%#.8x\n", ori(3, 4, 0xbe));
+	pi(blr());
 	pcodecache();
+	load(3, 0xdeadbeefc0debabe);
+********************/
+
+/**** PUTC '*' ****
+	*instr_ptr = li(3, 42); instr_ptr++;
+	*instr_ptr = sldi(6, 3, (24+32)); instr_ptr++;
+	*instr_ptr = li(3, 0x58); instr_ptr++;
+	*instr_ptr = li(4, 0); instr_ptr++;
+	*instr_ptr = li(5, 1); instr_ptr++;
+	*instr_ptr = sc(1); instr_ptr++;
+	*instr_ptr = blr(); instr_ptr++;
+******************/
+
+
+//	for (;;) {
+//	  load(r3, rand());
+//	  load(r4, rand());
+//	  load(r5, rand());
+//	  load(r6, rand());
+
+          *instr_ptr = li(r3, 'A'); instr_ptr++;
+	  *instr_ptr = sldi(r6, r3, (24+32)); instr_ptr++;
+
+	  load(r4, (uint64_t) 1u << 32u); // Set TM bit, so we don't get TM unavailable exception in kernel space
+          *instr_ptr = mfmsr(r3); instr_ptr++;
+	  *instr_ptr = 0x7c831b78; instr_ptr++; // or r3, r4, r3
+	  *instr_ptr = mtmsrd(r3, 0); instr_ptr++;
+
+	  load(r5, 1);
+	  load(r3, 0x58);
+	  load(r4, 0);
+	  *instr_ptr=0x7c00051d; instr_ptr++; // tbegin.
+	  *instr_ptr=0x7c0005dd; instr_ptr++; // tsuspend.
+
+	  *instr_ptr = sc(1); instr_ptr++;
+	  *instr_ptr = blr(); instr_ptr++;
+
+	  r = write(fd, first_instr, 4*(instr_ptr-first_instr));
+	  if (r == -1) {
+		perror("write()");
+		exit(1);
+	  }
+
+          pcodecache();
+
+//	  instr_ptr=(uint32_t *)first_instr;
+//	}
 }
