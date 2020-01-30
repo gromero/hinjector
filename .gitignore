@@ -1,0 +1,16 @@
+.cache.mk
+.gdb_history
+.k.ko.cmd
+.k.mod.cmd
+.k.mod.o.cmd
+.k.o.cmd
+.tmp_versions/
+Module.symvers
+injector
+k.ko
+k.mod
+k.mod.c
+k.mod.o
+modules.order
+payload.bin
+payload.o
