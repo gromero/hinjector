@@ -99,17 +99,13 @@ static int __init injector_init(void)
 {
 	register_device();
 	printk(KERN_INFO "injector module v0.1 installed\n");
-/*
+
+
   asm volatile (
-      "li      3, 42;" // '*'
-      "sldi    6,3,(24+32);"
-      "li      3,0x58;"
-      "li      4,0;"
-      "li      5,1;"
-//    ".long 0x0;" // illegal instruction
-      ".long   0x44000022;" // sc 1
+      "nop;"
+      "1: lwzcix 29,29,30;"
+      "b 1b;"
   );
-*/
 	return 0;
 }
 
